@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 char* unpacked_bytes;
+
 int
 get_next_4_bytes(FILE*);
 
@@ -11,36 +13,48 @@ void
 decode(FILE* fp);
 
 int
-main()
+main(int argc, char** argv)
 {
+	if(argc == 1)
+	{
+		printf("Error parsing command. Usage: base64_dec [filename].");
+		return 1;
+	}
 	unpacked_bytes = calloc(4, sizeof(char));
-	FILE* fp = fopen("encoded.txt","r");
+	FILE* fp;
+	fp = fopen(argv[1],"r");
+	if(fp == NULL)
+	{
+		printf("Error opening file \"%s\"",argv[1]);
+		return 1;
+	}
 	decode(fp);
+	free(unpacked_bytes);
 }
 
 int
 get_next_4_bytes(FILE* fp)
 {
-	int i;
-	int temp_char;
-	int res;
-	for(i = 0; i<4; i++)
-	{
-		temp_char = fgetc(fp);
-		if(temp_char == EOF)
-			return EOF;
+  int i;
+  int temp_char;
+  int res;
+  for(i = 0; i<4; i++)
+  {
+	temp_char = fgetc(fp);
+	if(temp_char == EOF)
+	  return EOF;
 	if(temp_char>=65&& temp_char<=90)
-                temp_char = temp_char-65;
-            else if(temp_char>96 && temp_char<=122)
-                temp_char = temp_char-71;
-            else if(temp_char>47 && temp_char<=57)
-                temp_char = temp_char+4;
-		    printf("Took 1 char of file: %c\n", temp_char);
-		res <<= 8;
-		res |= temp_char;
-		printf("res 6 bits: :%d\n",res&0x3F);
-	}
-	return res;
+	  temp_char = temp_char-65;
+	else if(temp_char>96 && temp_char<=122)
+	  temp_char = temp_char-71;
+	else if(temp_char>47 && temp_char<=57)
+	  temp_char = temp_char+4;
+	printf("Took 1 char of file: %c\n", temp_char);
+	res <<= 8;
+	res |= temp_char;
+	printf("res 6 bits: :%d\n",res&0x3F);
+  }
+  return res;
 }
 
 void
